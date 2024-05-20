@@ -194,5 +194,5 @@ if __name__ == "__main__":
         elif choice == "12":
             break
         else:
-            print("Opțiune invalidă! Te rog să încerci din nou.")1
+            print("Opțiune invalidă! Te rog să încerci din nou.")
             
