@@ -1,61 +1,9 @@
 import json
-import re
-class Contact:
-    def __init__(self, name, address, phone, email, birthday):
-        self.name = name
-        self.address = address
-        self.phone = phone
-        self.email = email
-        self.birthday = birthday
-from datetime import datetime, timedelta
-class ContactsBook:
-    def __init__(self):
-        self.contacts = []
-
-    def add_contact(self, contact):
-        self.contacts.append(contact)
-
-    def upcoming_birthdays(self, days):
-        today = datetime.now().date()
-        upcoming = today + timedelta(days=days)
-        upcoming_birthdays = []
-        for contact in self.contacts:
-            if contact.birthday.month == upcoming.month and contact.birthday.day == upcoming.day:
-                upcoming_birthdays.append(contact)
-        return upcoming_birthdays
-
-    def display_contacts(self):
-        for contact in self.contacts:
-            print(f"Name: {contact.name}, Address: {contact.address}, Phone: {contact.phone}, Email: {contact.email}, Birthday: {contact.birthday}")
-
-def main():
-    # Create ContactsBook object
-    my_contacts = ContactsBook()
-
-    # Add sample contacts
-    contact1 = Contact("Ana Maria", "Strada Livezii", "123-456-7890", "ana@example.com", datetime(1990, 8, 10))
-    contact2 = Contact("Dan Iom", "Strada Tisa", "987-654-3210", "dan@example.com", datetime(1985, 3, 15))
-    my_contacts.add_contact(contact1)
-    my_contacts.add_contact(contact2)
-
-    # Display all contacts
-    print("All Contacts:")
-    my_contacts.display_contacts()
-
-    # Display contacts with upcoming birthdays within 7 days
-    print("\nUpcoming Birthdays (within 7 days):")
-    upcoming = my_contacts.upcoming_birthdays(7)
-    if upcoming:
-        for contact in upcoming:
-            print(f"Name: {contact.name}, Birthday: {contact.birthday}")
-    else:
-        print("No upcoming birthdays within 7 days.")
-
-if __name__ == "__main__":
-    main()
-import json
 import os
+from datetime import datetime, timedelta
+import re
 
+CONTACTS_FILE = "contacts.json"
 NOTES_FILE = "notes.json"
 
 def load_data(file):
@@ -67,6 +15,70 @@ def load_data(file):
 def save_data(file, data):
     with open(file, 'w') as f:
         json.dump(data, f, indent=4)
+
+def validate_phone(phone):
+    return re.fullmatch(r'\d{10,11}', phone) is not None
+
+def validate_email(email):
+    return re.fullmatch(r"[^@]+@[^@]+\.[^@]+", email) is not None
+
+def add_contact(name, address, phone, email, birthday):
+    contacts = load_data(CONTACTS_FILE)
+    if not validate_phone(phone):
+        print("Număr de telefon invalid!")
+        return
+    if not validate_email(email):
+        print("Email invalid!")
+        return
+    contact = {
+        "name": name,
+        "address": address,
+        "phone": phone,
+        "email": email,
+        "birthday": birthday
+    }
+    contacts.append(contact)
+    save_data(CONTACTS_FILE, contacts)
+    print("Contact adăugat cu succes!")
+
+def display_contacts():
+    contacts = load_data(CONTACTS_FILE)
+    for contact in contacts:
+        print(contact)
+
+def search_contacts(query):
+    contacts = load_data(CONTACTS_FILE)
+    results = [contact for contact in contacts if query.lower() in contact['name'].lower()]
+    for result in results:
+        print(result)
+
+def edit_contact(name, new_data):
+    contacts = load_data(CONTACTS_FILE)
+    for contact in contacts:
+        if contact['name'] == name:
+            contact.update(new_data)
+            save_data(CONTACTS_FILE, contacts)
+            print("Contact editat cu succes!")
+            return
+    print("Contactul nu a fost găsit!")
+
+def delete_contact(name):
+    contacts = load_data(CONTACTS_FILE)
+    contacts = [contact for contact in contacts if contact['name'] != name]
+    save_data(CONTACTS_FILE, contacts)
+    print("Contact șters cu succes!")
+
+def contacts_with_upcoming_birthdays(days):
+    contacts = load_data(CONTACTS_FILE)
+    upcoming_birthdays = []
+    today = datetime.now()
+    for contact in contacts:
+        birthday = datetime.strptime(contact['birthday'], "%Y-%m-%d")
+        birthday_this_year = birthday.replace(year=today.year)
+        if 0 <= (birthday_this_year - today).days <= days:
+            upcoming_birthdays.append(contact)
+    for contact in upcoming_birthdays:
+        print(contact)
 
 def add_note(text):
     notes = load_data(NOTES_FILE)
@@ -101,6 +113,8 @@ def delete_note(text):
     notes = [note for note in notes if note['text'] != text]
     save_data(NOTES_FILE, notes)
     print("Notiță ștearsă cu succes!")
+
+# Exemple de utilizare
 if __name__ == "__main__":
     while True:
         print("\nMeniu:")
@@ -180,4 +194,5 @@ if __name__ == "__main__":
         elif choice == "12":
             break
         else:
-            print("Opțiune invalidă! Te rog să încerci din nou.")
+            print("Opțiune invalidă! Te rog să încerci din nou.")1
+            
