@@ -1,3 +1,51 @@
+import json
+import os
+
+NOTES_FILE = "notes.json"
+
+def load_data(file):
+    if os.path.exists(file):
+        with open(file, 'r') as f:
+            return json.load(f)
+    return []
+
+def save_data(file, data):
+    with open(file, 'w') as f:
+        json.dump(data, f, indent=4)
+
+def add_note(text):
+    notes = load_data(NOTES_FILE)
+    note = {"text": text}
+    notes.append(note)
+    save_data(NOTES_FILE, notes)
+    print("Notiță adăugată cu succes!")
+
+def display_notes():
+    notes = load_data(NOTES_FILE)
+    for note in notes:
+        print(note)
+
+def search_notes(query):
+    notes = load_data(NOTES_FILE)
+    results = [note for note in notes if query.lower() in note['text'].lower()]
+    for result in results:
+        print(result)
+
+def edit_note(old_text, new_text):
+    notes = load_data(NOTES_FILE)
+    for note in notes:
+        if note['text'] == old_text:
+            note['text'] = new_text
+            save_data(NOTES_FILE, notes)
+            print("Notiță editată cu succes!")
+            return
+    print("Notița nu a fost găsită!")
+
+def delete_note(text):
+    notes = load_data(NOTES_FILE)
+    notes = [note for note in notes if note['text'] != text]
+    save_data(NOTES_FILE, notes)
+    print("Notiță ștearsă cu succes!")
 if __name__ == "__main__":
     while True:
         print("\nMeniu:")
