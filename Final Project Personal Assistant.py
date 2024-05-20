@@ -1,6 +1,3 @@
-from contacts import add_contact, display_contacts, search_contacts, edit_contact, delete_contact, contacts_with_upcoming_birthdays
-from notes import add_note, display_notes, search_notes, edit_note, delete_note
-
 if __name__ == "__main__":
     while True:
         print("\nMeniu:")
